@@ -1,0 +1,83 @@
+import random
+
+class Pokemon:
+  potential_element = ["Fire", "Water", "Grass"]
+  def __init__(self, name, level, element, maximum_health, current_health, is_knocked = False):
+    self.name = name
+    self.level = level
+    self.element = element
+    self.maximum_health = maximum_health
+    self.current_health = current_health
+    self.is_knocked = is_knocked
+
+  def get_element(self):
+    return self.element
+  
+  def get_level(self):
+    return self.level
+
+  def get_weakness(self):
+    for i in range(potential_element):
+      if self.get_element() == element[i]:
+        weakness = element[i+1]
+    return weakness
+
+  def lose_health(self, amount):
+    if (self.current_health == 0):
+      self.knock_out()
+    print("{} lost {} health.".format(self.name, amount))
+    return (self.current_health - amount)
+
+
+  def gain_health(self, amount):
+    print("{} now has {} health.".format(self.name, amount + self.current_health))
+    return (self.current_health + amount)
+
+  def knock_out(self):
+    self.is_knocked = True
+    print("{} is knocked out.".format(self.name))
+    return (self.is_knocked)
+
+  def attack(self, enemy):
+    if self.get_element() == enemy.get_element():
+      damage = random.randint(0,100) * (self.get_level()) / 100
+      enemy.lose_health(damage)
+    elif (self.get_weakness() == enemy.get_element()):  
+      damage = random.randint(0,100) * (self.get_level()) / 200
+      enemy.lose_health(damage)
+    elif (enemy.get_weakness() == self.get_element()):
+      damage = random.randint(0,100) * 2 * (self.get_level()) / 100
+      enemy.lose_health(damage)
+
+class Trainer:
+  def __init__(self, name, potions, pokemons, active_pokemon):
+    self.name = name
+    self.potions = potions
+    self.pokemons = pokemons
+    self.active_pokemon = active_pokemon
+
+  def attack(self, enemy):
+    enemy_pokemon = enemy.pokemons[enemy.active_pokemon]
+    self.active_pokemon.attack(enemy_pokemon)
+
+  def heal(self, potion):
+    for pot in self.potions:
+      current_potion = pot
+      self.potions.pop(pot)
+    self.active_pokemon.gain_health(pot)
+
+  def switch_pokemon(self):
+    for i in range(len(self.pokemons)):
+      if self.pokemons[i] == self.active_pokemon:
+        pokemon_index = i
+    try:
+      self.active_pokemon = self.pokemons[pokemon_index + 1]
+    except IndexError:
+      print("There is no pokemon beyond {}".format(self.active_pokemon))   
+      self.active_pokemon = self.pokemons[0]
+    return self.active_pokemon
+
+jake = Trainer("Jake", [10,20,30], ["f", "g", "h", "i", "j"], "g")    
+mike = Trainer("Mike", [10,20,30], ["a", "b", "c", "d", "e"], "e")
+print(mike.switch_pokemon())
+    
