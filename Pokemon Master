@@ -108,8 +108,8 @@ class Trainer:
  ## TESTING AREA ##   
 
 a = Pokemon("a", 1, "Fire", 100)
-b = Pokemon("a", 1, "Water", 100)
-c = Pokemon("a", 1, "Grass", 100)
+b = Pokemon("b", 1, "Water", 100)
+c = Pokemon("c", 1, "Grass", 100)
 j_pokemon = [a, b, c]
 
 d = Pokemon("d", 1, "Fire", 100)
