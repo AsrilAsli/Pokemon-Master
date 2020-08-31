@@ -2,11 +2,11 @@ import random
 
 class Pokemon:
   potential_element = ["Fire", "Water", "Grass"]
-  def __init__(self, name, level, element, maximum_health, current_health, is_knocked = False):
+  def __init__(self, name, level, element, current_health, is_knocked = False):
     self.name = name
     self.level = level
     self.element = element
-    self.maximum_health = maximum_health
+    self.max_health = 100 + 10 * self.level
     self.current_health = current_health
     self.is_knocked = is_knocked
 
@@ -30,8 +30,15 @@ class Pokemon:
 
 
   def gain_health(self, amount):
-    print("{} now has {} health.".format(self.name, amount + self.current_health))
-    return (self.current_health + amount)
+    potential_total_health = self.current_health + amount
+    if potential_total_health > self.max_health:
+      potential_total_health = self.max_health
+      print("{} now has {} health.".format(self.name, potential_total_health))
+      self.current_health = potential_total_health
+      return
+    print("{} now has {} health.".format(self.name, potential_total_health))
+    self.current_health = potential_total_health
+    return
 
   def knock_out(self):
     self.is_knocked = True
@@ -39,45 +46,88 @@ class Pokemon:
     return (self.is_knocked)
 
   def attack(self, enemy):
-    if self.get_element() == enemy.get_element():
-      damage = random.randint(0,100) * (self.get_level()) / 100
-      enemy.lose_health(damage)
-    elif (self.get_weakness() == enemy.get_element()):  
-      damage = random.randint(0,100) * (self.get_level()) / 200
-      enemy.lose_health(damage)
-    elif (enemy.get_weakness() == self.get_element()):
-      damage = random.randint(0,100) * 2 * (self.get_level()) / 100
-      enemy.lose_health(damage)
+    if self.is_knocked is False:
+      if self.get_element() == enemy.get_element():
+        damage = random.randint(0,100) * (self.get_level()) / 100
+        enemy.lose_health(damage)
+        return
+      elif (self.get_weakness() == enemy.get_element()):  
+        damage = random.randint(0,100) * (self.get_level()) / 200
+        enemy.lose_health(damage)
+        return
+      elif (enemy.get_weakness() == self.get_element()):
+        damage = random.randint(0,100) * 2 * (self.get_level()) / 100
+        enemy.lose_health(damage)
+        return
+      print("Trainers pokemon has fainted.")
+      return
 
 class Trainer:
-  def __init__(self, name, potions, pokemons, active_pokemon):
+  def __init__(self, name, potions):
     self.name = name
     self.potions = potions
-    self.pokemons = pokemons
-    self.active_pokemon = active_pokemon
+    self.pokemons = []
+    self.active_pokemon = None
 
   def attack(self, enemy):
-    enemy_pokemon = enemy.pokemons[enemy.active_pokemon]
+    enemy_pokemon = enemy.active_pokemon
     self.active_pokemon.attack(enemy_pokemon)
 
-  def heal(self, potion):
-    for pot in self.potions:
-      current_potion = pot
-      self.potions.pop(pot)
-    self.active_pokemon.gain_health(pot)
+  def heal(self):
+    potion = self.potions.pop()
+    self.active_pokemon.gain_health(potion)
 
   def switch_pokemon(self):
-    for i in range(len(self.pokemons)):
-      if self.pokemons[i] == self.active_pokemon:
-        pokemon_index = i
-    try:
-      self.active_pokemon = self.pokemons[pokemon_index + 1]
-    except IndexError:
-      print("There is no pokemon beyond {}".format(self.active_pokemon))   
-      self.active_pokemon = self.pokemons[0]
-    return self.active_pokemon
+    if len(self.pokemons) > 0:
+      current_pokemon = self.active_pokemon
+      for i in range(len(self.pokemons)):
+        if self.pokemons[i] is current_pokemon:
+          if current_pokemon.is_knocked  is True:
+           continue
+          try:
+            next_pokemon = self.pokemons[i+1]
+            print(next_pokemon)
+            self.set_active_pokemon(next_pokemon)
+          except IndexError:
+            print("Theres no pokemon beyond {}.".format(current_pokemon.name))
+            print("Resetting to pokemon at initial position.")
+            next_pokemon = self.pokemons[0]
+            self.set_active_pokemon(next_pokemon)
+          return
+        
+  def add_pokemon(self, pokemon):
+    if len(self.pokemons) < 6:
+      self.pokemons.append(pokemon)
+      return
 
-jake = Trainer("Jake", [10,20,30], ["f", "g", "h", "i", "j"], "g")    
-mike = Trainer("Mike", [10,20,30], ["a", "b", "c", "d", "e"], "e")
+  def set_active_pokemon(self, pokemon):
+    if pokemon in self.pokemons:
+      self.active_pokemon = pokemon
+      return
+    print(pokemon.name + " doesn't exist in Trainer's list of pokemons.")
+ ## TESTING AREA ##   
+
+a = Pokemon("a", 1, "Fire", 100)
+b = Pokemon("a", 1, "Water", 100)
+c = Pokemon("a", 1, "Grass", 100)
+j_pokemon = [a, b, c]
+
+d = Pokemon("d", 1, "Fire", 100)
+e = Pokemon("e", 1, "Water", 100)
+f = Pokemon("f", 1, "Grass", 100)
+m_pokemon = [d, e, f]
+
+jake = Trainer("Jake", [10,20,30])    
+mike = Trainer("Mike", [10,20,30])
+
+for pokemon in j_pokemon:
+  jake.add_pokemon(pokemon)
+for pokemon in m_pokemon:
+  mike.add_pokemon(pokemon)
+
+jake.set_active_pokemon(a)
+mike.set_active_pokemon(f)
+
 print(mike.switch_pokemon())
-    
+jake.attack(mike)
+mike.heal()
