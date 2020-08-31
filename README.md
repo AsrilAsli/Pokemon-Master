@@ -1,2 +1,2 @@
-# mini_projects
-Short and sweet projects that i try to improve along the way
+# Pokemon-Master
+An attempt to mimic the mechanics of pokemont trainer and their pokemons
